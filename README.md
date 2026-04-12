@@ -13,7 +13,7 @@ O SisGESC é um banco de dados relacional para uma escola privada de Ensino Fund
 O banco foi modelado seguindo as boas práticas de projeto relacional, com normalização até a 3ª Forma Normal (3FN).
 
  Tecnologias Utilizadas
-
+ -MySQL
 - Modelo Entidade-Relacionamento (DER)
 - Normalização de dados
 - Constraints (NOT NULL, UNIQUE, DEFAULT, CHECK)
