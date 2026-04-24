@@ -1,32 +1,14 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Tempo de geração: 12/04/2026 às 19:14
--- Versão do servidor: 10.4.32-MariaDB
--- Versão do PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+
 
 CREATE DATABASE IF NOT EXISTS sisgesc;
 USE sisgesc;
--- Banco de dados: `sisgesc`
---
 
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `tb_aluno`
---
 
 CREATE TABLE `tb_aluno` (
   `pk_aluno` int(11) NOT NULL,
@@ -43,9 +25,7 @@ CREATE TABLE `tb_aluno` (
 
 -- --------------------------------------------------------
 
---
--- Estrutura para tabela `tb_carga_horaria_docente`
---
+
 
 CREATE TABLE `tb_carga_horaria_docente` (
   `pk_carga` int(11) NOT NULL,
@@ -59,11 +39,7 @@ CREATE TABLE `tb_carga_horaria_docente` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
 
---
--- Estrutura para tabela `tb_conta_receber`
---
 
 CREATE TABLE `tb_conta_receber` (
   `pk_conta` int(11) NOT NULL,
@@ -77,9 +53,7 @@ CREATE TABLE `tb_conta_receber` (
 
 -- --------------------------------------------------------
 
---
--- Estrutura para tabela `tb_contrato_educacional`
---
+
 
 CREATE TABLE `tb_contrato_educacional` (
   `pk_contrato` int(11) NOT NULL,
@@ -93,11 +67,7 @@ CREATE TABLE `tb_contrato_educacional` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
 
---
--- Estrutura para tabela `tb_curso`
---
 
 CREATE TABLE `tb_curso` (
   `pk_curso` int(11) NOT NULL,
@@ -109,11 +79,6 @@ CREATE TABLE `tb_curso` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `tb_disciplina`
---
 
 CREATE TABLE `tb_disciplina` (
   `pk_disciplina` int(11) NOT NULL,
@@ -125,11 +90,7 @@ CREATE TABLE `tb_disciplina` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
 
---
--- Estrutura para tabela `tb_falta`
---
 
 CREATE TABLE `tb_falta` (
   `pk_falta` int(11) NOT NULL,
@@ -140,11 +101,6 @@ CREATE TABLE `tb_falta` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `tb_funcionario`
---
 
 CREATE TABLE `tb_funcionario` (
   `pk_funcionario` int(11) NOT NULL,
@@ -159,11 +115,6 @@ CREATE TABLE `tb_funcionario` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `tb_grade_horaria`
---
 
 CREATE TABLE `tb_grade_horaria` (
   `pk_grade` int(11) NOT NULL,
@@ -175,11 +126,6 @@ CREATE TABLE `tb_grade_horaria` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `tb_inadimplencia`
---
 
 CREATE TABLE `tb_inadimplencia` (
   `pk_inadimplencia` int(11) NOT NULL,
@@ -192,11 +138,6 @@ CREATE TABLE `tb_inadimplencia` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `tb_matricula`
---
 
 CREATE TABLE `tb_matricula` (
   `pk_matricula` int(11) NOT NULL,
@@ -208,11 +149,7 @@ CREATE TABLE `tb_matricula` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
 
---
--- Estrutura para tabela `tb_mensalidade`
---
 
 CREATE TABLE `tb_mensalidade` (
   `pk_mensalidade` int(11) NOT NULL,
@@ -226,11 +163,6 @@ CREATE TABLE `tb_mensalidade` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `tb_nota`
---
 
 CREATE TABLE `tb_nota` (
   `pk_nota` int(11) NOT NULL,
@@ -242,11 +174,7 @@ CREATE TABLE `tb_nota` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
 
---
--- Estrutura para tabela `tb_pagamento`
---
 
 CREATE TABLE `tb_pagamento` (
   `pk_pagamento` int(11) NOT NULL,
@@ -258,11 +186,7 @@ CREATE TABLE `tb_pagamento` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
 
---
--- Estrutura para tabela `tb_professor`
---
 
 CREATE TABLE `tb_professor` (
   `pk_professor` int(11) NOT NULL,
@@ -274,11 +198,7 @@ CREATE TABLE `tb_professor` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
 
---
--- Estrutura para tabela `tb_turma`
---
 
 CREATE TABLE `tb_turma` (
   `pk_turma` int(11) NOT NULL,
@@ -295,9 +215,7 @@ CREATE TABLE `tb_turma` (
 
 -- --------------------------------------------------------
 
---
--- Estrutura para tabela `tb_vinculo_professor_disciplina`
---
+
 
 CREATE TABLE `tb_vinculo_professor_disciplina` (
   `pk_vinculo` int(11) NOT NULL,
@@ -310,335 +228,224 @@ CREATE TABLE `tb_vinculo_professor_disciplina` (
   `ultima_atualizacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Índices para tabelas despejadas
---
 
---
--- Índices de tabela `tb_aluno`
---
 ALTER TABLE `tb_aluno`
   ADD PRIMARY KEY (`pk_aluno`),
   ADD UNIQUE KEY `cpf_aluno` (`cpf_aluno`),
   ADD UNIQUE KEY `email_aluno` (`email_aluno`);
 
---
--- Índices de tabela `tb_carga_horaria_docente`
---
+
 ALTER TABLE `tb_carga_horaria_docente`
   ADD PRIMARY KEY (`pk_carga`),
   ADD KEY `fk_professor` (`fk_professor`);
 
---
--- Índices de tabela `tb_conta_receber`
---
+
 ALTER TABLE `tb_conta_receber`
   ADD PRIMARY KEY (`pk_conta`),
   ADD KEY `fk_mensalidade` (`fk_mensalidade`);
 
---
--- Índices de tabela `tb_contrato_educacional`
---
+
 ALTER TABLE `tb_contrato_educacional`
   ADD PRIMARY KEY (`pk_contrato`),
   ADD KEY `fk_aluno` (`fk_aluno`),
   ADD KEY `fk_curso` (`fk_curso`);
 
---
--- Índices de tabela `tb_curso`
---
+
 ALTER TABLE `tb_curso`
   ADD PRIMARY KEY (`pk_curso`);
 
---
--- Índices de tabela `tb_disciplina`
---
+
 ALTER TABLE `tb_disciplina`
   ADD PRIMARY KEY (`pk_disciplina`),
   ADD KEY `fk_curso` (`fk_curso`);
 
---
--- Índices de tabela `tb_falta`
---
+
 ALTER TABLE `tb_falta`
   ADD PRIMARY KEY (`pk_falta`),
   ADD KEY `fk_matricula` (`fk_matricula`);
 
---
--- Índices de tabela `tb_funcionario`
---
+
 ALTER TABLE `tb_funcionario`
   ADD PRIMARY KEY (`pk_funcionario`),
   ADD UNIQUE KEY `cpf` (`cpf`),
   ADD UNIQUE KEY `email` (`email`);
 
---
--- Índices de tabela `tb_grade_horaria`
---
+
 ALTER TABLE `tb_grade_horaria`
   ADD PRIMARY KEY (`pk_grade`),
   ADD KEY `fk_turma` (`fk_turma`);
 
---
--- Índices de tabela `tb_inadimplencia`
---
+
 ALTER TABLE `tb_inadimplencia`
   ADD PRIMARY KEY (`pk_inadimplencia`),
   ADD KEY `fk_aluno` (`fk_aluno`),
   ADD KEY `fk_mensalidade` (`fk_mensalidade`);
 
---
--- Índices de tabela `tb_matricula`
---
+
 ALTER TABLE `tb_matricula`
   ADD PRIMARY KEY (`pk_matricula`),
   ADD KEY `fk_aluno` (`fk_aluno`),
   ADD KEY `fk_turma` (`fk_turma`);
 
---
--- Índices de tabela `tb_mensalidade`
---
+
 ALTER TABLE `tb_mensalidade`
   ADD PRIMARY KEY (`pk_mensalidade`),
   ADD KEY `fk_contrato` (`fk_contrato`);
 
---
--- Índices de tabela `tb_nota`
---
+
 ALTER TABLE `tb_nota`
   ADD PRIMARY KEY (`pk_nota`),
   ADD KEY `fk_matricula` (`fk_matricula`);
 
---
--- Índices de tabela `tb_pagamento`
---
+
 ALTER TABLE `tb_pagamento`
   ADD PRIMARY KEY (`pk_pagamento`),
   ADD KEY `fk_mensalidade` (`fk_mensalidade`);
 
---
--- Índices de tabela `tb_professor`
---
+
 ALTER TABLE `tb_professor`
   ADD PRIMARY KEY (`pk_professor`),
   ADD KEY `fk_funcionario` (`fk_funcionario`);
 
---
--- Índices de tabela `tb_turma`
---
+
 ALTER TABLE `tb_turma`
   ADD PRIMARY KEY (`pk_turma`),
   ADD KEY `fk_disciplina` (`fk_disciplina`),
   ADD KEY `fk_professor` (`fk_professor`);
 
---
--- Índices de tabela `tb_vinculo_professor_disciplina`
---
+
 ALTER TABLE `tb_vinculo_professor_disciplina`
   ADD PRIMARY KEY (`pk_vinculo`),
   ADD KEY `fk_professor` (`fk_professor`),
   ADD KEY `fk_disciplina` (`fk_disciplina`);
 
---
--- AUTO_INCREMENT para tabelas despejadas
---
 
---
--- AUTO_INCREMENT de tabela `tb_aluno`
---
 ALTER TABLE `tb_aluno`
   MODIFY `pk_aluno` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_carga_horaria_docente`
---
+
 ALTER TABLE `tb_carga_horaria_docente`
   MODIFY `pk_carga` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_conta_receber`
---
+
 ALTER TABLE `tb_conta_receber`
   MODIFY `pk_conta` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_contrato_educacional`
---
+
 ALTER TABLE `tb_contrato_educacional`
   MODIFY `pk_contrato` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_curso`
---
+
 ALTER TABLE `tb_curso`
   MODIFY `pk_curso` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_disciplina`
---
+
 ALTER TABLE `tb_disciplina`
   MODIFY `pk_disciplina` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_falta`
---
+
 ALTER TABLE `tb_falta`
   MODIFY `pk_falta` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_funcionario`
---
+
 ALTER TABLE `tb_funcionario`
   MODIFY `pk_funcionario` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_grade_horaria`
---
+
 ALTER TABLE `tb_grade_horaria`
   MODIFY `pk_grade` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_inadimplencia`
---
+
 ALTER TABLE `tb_inadimplencia`
   MODIFY `pk_inadimplencia` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_matricula`
---
+
 ALTER TABLE `tb_matricula`
   MODIFY `pk_matricula` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_mensalidade`
---
+
 ALTER TABLE `tb_mensalidade`
   MODIFY `pk_mensalidade` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_nota`
+MENT de tabela `tb_nota`
 --
 ALTER TABLE `tb_nota`
   MODIFY `pk_nota` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_pagamento`
---
+
 ALTER TABLE `tb_pagamento`
   MODIFY `pk_pagamento` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_professor`
---
+
 ALTER TABLE `tb_professor`
   MODIFY `pk_professor` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_turma`
---
+
 ALTER TABLE `tb_turma`
   MODIFY `pk_turma` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT de tabela `tb_vinculo_professor_disciplina`
---
+
 ALTER TABLE `tb_vinculo_professor_disciplina`
   MODIFY `pk_vinculo` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- Restrições para tabelas despejadas
---
 
---
--- Restrições para tabelas `tb_carga_horaria_docente`
---
 ALTER TABLE `tb_carga_horaria_docente`
   ADD CONSTRAINT `tb_carga_horaria_docente_ibfk_1` FOREIGN KEY (`fk_professor`) REFERENCES `tb_professor` (`pk_professor`);
 
---
--- Restrições para tabelas `tb_conta_receber`
---
+
 ALTER TABLE `tb_conta_receber`
   ADD CONSTRAINT `tb_conta_receber_ibfk_1` FOREIGN KEY (`fk_mensalidade`) REFERENCES `tb_mensalidade` (`pk_mensalidade`);
 
---
--- Restrições para tabelas `tb_contrato_educacional`
---
+
 ALTER TABLE `tb_contrato_educacional`
   ADD CONSTRAINT `tb_contrato_educacional_ibfk_1` FOREIGN KEY (`fk_aluno`) REFERENCES `tb_aluno` (`pk_aluno`),
   ADD CONSTRAINT `tb_contrato_educacional_ibfk_2` FOREIGN KEY (`fk_curso`) REFERENCES `tb_curso` (`pk_curso`);
 
---
--- Restrições para tabelas `tb_disciplina`
---
+
 ALTER TABLE `tb_disciplina`
   ADD CONSTRAINT `tb_disciplina_ibfk_1` FOREIGN KEY (`fk_curso`) REFERENCES `tb_curso` (`pk_curso`);
 
---
--- Restrições para tabelas `tb_falta`
---
+
 ALTER TABLE `tb_falta`
   ADD CONSTRAINT `tb_falta_ibfk_1` FOREIGN KEY (`fk_matricula`) REFERENCES `tb_matricula` (`pk_matricula`);
 
---
--- Restrições para tabelas `tb_grade_horaria`
---
+
 ALTER TABLE `tb_grade_horaria`
   ADD CONSTRAINT `tb_grade_horaria_ibfk_1` FOREIGN KEY (`fk_turma`) REFERENCES `tb_turma` (`pk_turma`);
 
---
--- Restrições para tabelas `tb_inadimplencia`
---
+
 ALTER TABLE `tb_inadimplencia`
   ADD CONSTRAINT `tb_inadimplencia_ibfk_1` FOREIGN KEY (`fk_aluno`) REFERENCES `tb_aluno` (`pk_aluno`),
   ADD CONSTRAINT `tb_inadimplencia_ibfk_2` FOREIGN KEY (`fk_mensalidade`) REFERENCES `tb_mensalidade` (`pk_mensalidade`);
 
---
--- Restrições para tabelas `tb_matricula`
---
+
 ALTER TABLE `tb_matricula`
   ADD CONSTRAINT `tb_matricula_ibfk_1` FOREIGN KEY (`fk_aluno`) REFERENCES `tb_aluno` (`pk_aluno`),
   ADD CONSTRAINT `tb_matricula_ibfk_2` FOREIGN KEY (`fk_turma`) REFERENCES `tb_turma` (`pk_turma`);
 
---
--- Restrições para tabelas `tb_mensalidade`
---
+
 ALTER TABLE `tb_mensalidade`
   ADD CONSTRAINT `tb_mensalidade_ibfk_1` FOREIGN KEY (`fk_contrato`) REFERENCES `tb_contrato_educacional` (`pk_contrato`);
 
---
--- Restrições para tabelas `tb_nota`
---
+
 ALTER TABLE `tb_nota`
   ADD CONSTRAINT `tb_nota_ibfk_1` FOREIGN KEY (`fk_matricula`) REFERENCES `tb_matricula` (`pk_matricula`);
 
---
--- Restrições para tabelas `tb_pagamento`
---
 ALTER TABLE `tb_pagamento`
   ADD CONSTRAINT `tb_pagamento_ibfk_1` FOREIGN KEY (`fk_mensalidade`) REFERENCES `tb_mensalidade` (`pk_mensalidade`);
 
---
--- Restrições para tabelas `tb_professor`
---
+
 ALTER TABLE `tb_professor`
   ADD CONSTRAINT `tb_professor_ibfk_1` FOREIGN KEY (`fk_funcionario`) REFERENCES `tb_funcionario` (`pk_funcionario`);
 
---
--- Restrições para tabelas `tb_turma`
---
+
 ALTER TABLE `tb_turma`
   ADD CONSTRAINT `tb_turma_ibfk_1` FOREIGN KEY (`fk_disciplina`) REFERENCES `tb_disciplina` (`pk_disciplina`),
   ADD CONSTRAINT `tb_turma_ibfk_2` FOREIGN KEY (`fk_professor`) REFERENCES `tb_professor` (`pk_professor`);
 
---
--- Restrições para tabelas `tb_vinculo_professor_disciplina`
---
+
 ALTER TABLE `tb_vinculo_professor_disciplina`
   ADD CONSTRAINT `tb_vinculo_professor_disciplina_ibfk_1` FOREIGN KEY (`fk_professor`) REFERENCES `tb_professor` (`pk_professor`),
   ADD CONSTRAINT `tb_vinculo_professor_disciplina_ibfk_2` FOREIGN KEY (`fk_disciplina`) REFERENCES `tb_disciplina` (`pk_disciplina`);
 COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
