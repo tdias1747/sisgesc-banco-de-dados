@@ -1,4 +1,4 @@
---  Carga Docente (Módulo RH)
+--  Carga Docente (Módulo RH está correto!)
 SELECT p.nome_professor, COUNT(DISTINCT f.sk_curso) AS total_cursos, COUNT(f.sk_aluno) AS total_alunos
 FROM fato_desempenho f JOIN dim_professor p ON f.sk_professor = p.sk_professor GROUP BY p.nome_professor;
 
