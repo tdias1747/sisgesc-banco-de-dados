@@ -258,7 +258,7 @@ GROUP BY p.nome_professor;
 SELECT p.titulacao, ROUND(AVG(f.nota_media), 2) as media_notas
 FROM fato_desempenho f JOIN dim_professor p ON f.sk_professor = p.sk_professor GROUP BY p.titulacao;
 
--- BI 2: Risco de Inadimplência
+-- BI 2: Risco de Inadimplência (Pág 38 do WORD)
 SELECT a.nome_aluno, f.dias_atraso,
 CASE WHEN f.dias_atraso > 30 THEN 'CRÍTICO' WHEN f.dias_atraso > 0 THEN 'ATENÇÃO' ELSE 'EM DIA' END as Status
 FROM fato_financeiro f JOIN dim_aluno a ON f.sk_aluno = a.sk_aluno;
