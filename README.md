@@ -12,7 +12,7 @@ O SisGESC é um banco de dados relacional para uma escola privada de Ensino Supe
 
 O banco foi modelado seguindo as boas práticas de projeto relacional, com normalização até a 3ª Forma Normal (3FN).
 
- Métodos Utilzados
+ Métodos Utilizados
  
 - MySQL (by php admin interface)
 - Modelo Entidade-Relacionamento (DER) (OLTP) (by Microsoft Vision)
