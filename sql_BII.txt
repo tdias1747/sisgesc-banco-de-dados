@@ -2,7 +2,7 @@
 SELECT p.nome_professor, COUNT(DISTINCT f.sk_curso) AS total_cursos, COUNT(f.sk_aluno) AS total_alunos
 FROM fato_desempenho f JOIN dim_professor p ON f.sk_professor = p.sk_professor GROUP BY p.nome_professor;
 
--- Titulação vs Resultados (Doutores rendem mais?)
+-- Titulação vs Resultados (Doutores tem que render mais?)
 SELECT p.titulacao, ROUND(AVG(f.nota_media), 2) AS media_notas
 FROM fato_desempenho f JOIN dim_professor p ON f.sk_professor = p.sk_professor GROUP BY p.titulacao;
 
