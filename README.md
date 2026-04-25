@@ -4,7 +4,7 @@ Projeto de Modelagem de Banco de Dados foi desenvolvido para a disciplina de An�
 
  Sobre o Projeto
 
-O SisGESC é um banco de dados relacional para uma escola privada de Ensino Fundamental. O sistema integra três módulos principais:
+O SisGESC é um banco de dados relacional para uma escola privada de Ensino Superior. O sistema integra três módulos principais:
 
 -Módulo Acadêmico: Gerenciamento de alunos, cursos, disciplinas, turmas, matrículas, notas e faltas.
 -Módulo Financeiro: Controle de contratos, mensalidades, pagamentos, contas a receber e inadimplência.
