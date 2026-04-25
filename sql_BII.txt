@@ -6,7 +6,7 @@ FROM fato_desempenho f JOIN dim_professor p ON f.sk_professor = p.sk_professor G
 SELECT p.titulacao, ROUND(AVG(f.nota_media), 2) AS media_notas
 FROM fato_desempenho f JOIN dim_professor p ON f.sk_professor = p.sk_professor GROUP BY p.titulacao;
 
--- Inadimplência e Risco Financeiro
+-- Inadimplência e Risco Financeiro ( financeiro somando a mais?)
 SELECT a.nome_aluno, f.valor_pago, f.dias_atraso,
 CASE WHEN f.dias_atraso > 30 THEN 'CRÍTICO' WHEN f.dias_atraso > 0 THEN 'ATENÇÃO' ELSE 'OK' END AS Status
 FROM fato_financeiro f JOIN dim_aluno a ON f.sk_aluno = a.sk_aluno;
