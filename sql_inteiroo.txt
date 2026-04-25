@@ -247,18 +247,19 @@ GROUP BY da.sk_aluno, dt.sk_tempo;
 CREATE INDEX idx_desempenho_nota ON fato_desempenho(nota_media);
 CREATE INDEX idx_financeiro_atraso ON fato_financeiro(dias_atraso);
 
--- Validação de performance
+-- Validação de Explain (Características do Código)
+
 EXPLAIN SELECT p.nome_professor, AVG(f.nota_media) 
 FROM fato_desempenho f 
 JOIN dim_professor p ON f.sk_professor = p.sk_professor 
 GROUP BY p.nome_professor;
 
 
--- BI 1: Correlação Titulação vs Notas (Pág 39 do Word)
+-- BI 1: Correlação Titulação vs Notas (Pág 39 do Word p/ teste)
 SELECT p.titulacao, ROUND(AVG(f.nota_media), 2) as media_notas
 FROM fato_desempenho f JOIN dim_professor p ON f.sk_professor = p.sk_professor GROUP BY p.titulacao;
 
--- BI 2: Risco de Inadimplência (Pág 38 do WORD)
+-- BI 2: Risco de Inadimplência (Pág 38 do WORD p/ teste)
 SELECT a.nome_aluno, f.dias_atraso,
 CASE WHEN f.dias_atraso > 30 THEN 'CRÍTICO' WHEN f.dias_atraso > 0 THEN 'ATENÇÃO' ELSE 'EM DIA' END as Status
 FROM fato_financeiro f JOIN dim_aluno a ON f.sk_aluno = a.sk_aluno;
