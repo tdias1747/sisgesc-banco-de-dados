@@ -1,0 +1,12 @@
+
+-- Criação de índices para acelerar os JOINs entre Fato e Dimensões
+CREATE INDEX idx_fato_aluno ON fato_sisgesc(sk_aluno);
+CREATE INDEX idx_fato_curso ON fato_sisgesc(sk_curso);
+
+-- COMANDO EXPLAIN
+EXPLAIN SELECT 
+    a.nome_aluno, 
+    f.nota_media 
+FROM fato_sisgesc f 
+JOIN dim_aluno a ON f.sk_aluno = a.sk_aluno 
+WHERE f.nota_media > 7;
