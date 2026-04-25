@@ -263,7 +263,7 @@ SELECT a.nome_aluno, f.dias_atraso,
 CASE WHEN f.dias_atraso > 30 THEN 'CRÍTICO' WHEN f.dias_atraso > 0 THEN 'ATENÇÃO' ELSE 'EM DIA' END as Status
 FROM fato_financeiro f JOIN dim_aluno a ON f.sk_aluno = a.sk_aluno;
 
--- BI 3: Validação OLTP vs OLAP (Obrigatório no roteiro)
+-- BI 3: Validação OLTP vs OLAP (Obrigatório ter a relação)
 SELECT 
     (SELECT SUM(valor_pago) FROM tb_pagamento) as Total_Operacional,
     (SELECT SUM(valor_pago) FROM fato_financeiro) as Total_Analitico;
