@@ -165,7 +165,7 @@ CREATE TABLE dim_tempo (
     trimestre INT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- FATO 1: Desempenho Académico
+-- FATO 1: Desempenho Acadêmico
 CREATE TABLE fato_desempenho (
     sk_aluno INT,
     sk_professor INT,
