@@ -3,7 +3,7 @@ USE sisgesc;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
----LIMPEZA TOTAL (PADRÃO)
+-- LIMPEZA TOTAL (PADRÃO)
 
 DROP TABLE IF EXISTS tb_carga_horaria_docente, tb_vinculos_professor_disciplina, tb_professor, tb_funcionario;
 DROP TABLE IF EXISTS tb_inadimplencia, tb_contas_receber, tb_pagamento, tb_mensalidade, tb_contrato_educacional;
@@ -249,8 +249,11 @@ INSERT INTO tb_pagamento (fk_mensalidade, data_pagamento, valor_pago) VALUES
 (1, '2026-04-11', 1000.00), (2, '2026-04-10', 1000.00), (3, '2026-04-08', 1000.00), (4, '2026-04-25', 850.00);
 
 INSERT INTO tb_contas_receber (fk_mensalidade, valor_devido, status_conta) VALUES (2, 1000.00, 'Aberto');
+
 INSERT INTO tb_inadimplencia (fk_aluno, fk_mensalidade, dias_atraso, valor_multa) VALUES (2, 2, 16, 50.00);
+
 INSERT INTO tb_vinculos_professor_disciplina (fk_professor, fk_disciplina) VALUES (1, 1), (2, 3);
+
 INSERT INTO tb_carga_horaria_docente (fk_professor, horas_aula, horas_pesquisa) VALUES (1, 40, 10), (2, 30, 5);
 
 -- CRIAÇÃO DE DADOS ANALÍTICOS (vindo do olap)
@@ -328,7 +331,8 @@ FROM tb_professor p JOIN tb_funcionario f ON p.fk_funcionario = f.pk_funcionario
 INSERT INTO dim_curso (nk_id_curso, nome_curso, modalidade) 
 SELECT pk_curso, nome, modalidade FROM tb_curso;
 
--- Melhoria: Carga mais completa de dim_tempo (inclui vencimentos)
+-- LINHA QUE TORNA MAIS COMPLETO O dim_tempo
+
 INSERT INTO dim_tempo (data_referencia, mes, ano, trimestre) 
 SELECT DISTINCT data_pagamento, MONTH(data_pagamento), YEAR(data_pagamento), QUARTER(data_pagamento) 
 FROM tb_pagamento
@@ -336,7 +340,7 @@ UNION
 SELECT DISTINCT data_vencimento, MONTH(data_vencimento), YEAR(data_vencimento), QUARTER(data_vencimento) 
 FROM tb_mensalidade;
 
--- Linha "Desconhecido" para evitar NULL nas fatos (boa prática)
+--LINHA PARA MELHORAR O DESEMPENHO DO dim_tempo
 INSERT IGNORE INTO dim_tempo (sk_tempo, data_referencia, mes, ano, trimestre) 
 VALUES (-1, NULL, NULL, NULL, NULL);
 
