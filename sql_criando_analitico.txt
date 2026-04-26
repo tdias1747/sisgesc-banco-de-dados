@@ -1,0 +1,62 @@
+-- CRIAÇÃO DE DADOS ANALÍTICOS (vindo do olap)
+
+CREATE TABLE dim_aluno (
+    sk_aluno INT AUTO_INCREMENT PRIMARY KEY,
+    nk_id_aluno INT,
+    nome_aluno VARCHAR(150),
+    status_aluno VARCHAR(20)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE dim_professor (
+    sk_professor INT AUTO_INCREMENT PRIMARY KEY,
+    nk_id_professor INT,
+    nome_professor VARCHAR(150),
+    titulacao VARCHAR(50)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE dim_curso (
+    sk_curso INT AUTO_INCREMENT PRIMARY KEY,
+    nk_id_curso INT,
+    nome_curso VARCHAR(200),
+    modalidade VARCHAR(20)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE dim_tempo (
+    sk_tempo INT AUTO_INCREMENT PRIMARY KEY,
+    data_referencia DATE,
+    mes INT,
+    ano INT,
+    trimestre INT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE fato_desempenho (
+    sk_aluno INT,
+    sk_professor INT,
+    sk_curso INT,
+    sk_tempo INT,
+    nota_media DECIMAL(4,2),
+    FOREIGN KEY (sk_aluno) REFERENCES dim_aluno(sk_aluno),
+    FOREIGN KEY (sk_professor) REFERENCES dim_professor(sk_professor),
+    FOREIGN KEY (sk_curso) REFERENCES dim_curso(sk_curso),
+    FOREIGN KEY (sk_tempo) REFERENCES dim_tempo(sk_tempo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE fato_frequencia (
+    sk_aluno INT,
+    sk_curso INT,
+    sk_tempo INT,
+    total_faltas INT,
+    FOREIGN KEY (sk_aluno) REFERENCES dim_aluno(sk_aluno),
+    FOREIGN KEY (sk_curso) REFERENCES dim_curso(sk_curso),
+    FOREIGN KEY (sk_tempo) REFERENCES dim_tempo(sk_tempo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE fato_financeiro (
+    sk_aluno INT,
+    sk_tempo INT,
+    valor_pago DECIMAL(10,2),
+    dias_atraso INT,
+    FOREIGN KEY (sk_aluno) REFERENCES dim_aluno(sk_aluno),
+    FOREIGN KEY (sk_tempo) REFERENCES dim_tempo(sk_tempo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
