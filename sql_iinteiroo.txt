@@ -340,7 +340,7 @@ UNION
 SELECT DISTINCT data_vencimento, MONTH(data_vencimento), YEAR(data_vencimento), QUARTER(data_vencimento) 
 FROM tb_mensalidade;
 
---LINHA PARA MELHORAR O DESEMPENHO DO dim_tempo
+--LINHA PARA MELHORAR O DESEMPENHO DO dim_tempo (sem null)
 INSERT IGNORE INTO dim_tempo (sk_tempo, data_referencia, mes, ano, trimestre) 
 VALUES (-1, NULL, NULL, NULL, NULL);
 
