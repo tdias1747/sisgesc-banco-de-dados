@@ -11,7 +11,7 @@ FROM tb_professor p JOIN tb_funcionario f ON p.fk_funcionario = f.pk_funcionario
 INSERT INTO dim_curso (nk_id_curso, nome_curso, modalidade) 
 SELECT pk_curso, nome, modalidade FROM tb_curso;
 
--- Melhoria: Carga mais completa de dim_tempo (inclui vencimentos)
+-- LINHA PARA MELHORAR O DESEMPENHO DO dim_tempo
 INSERT INTO dim_tempo (data_referencia, mes, ano, trimestre) 
 SELECT DISTINCT data_pagamento, MONTH(data_pagamento), YEAR(data_pagamento), QUARTER(data_pagamento) 
 FROM tb_pagamento
@@ -19,7 +19,7 @@ UNION
 SELECT DISTINCT data_vencimento, MONTH(data_vencimento), YEAR(data_vencimento), QUARTER(data_vencimento) 
 FROM tb_mensalidade;
 
--- Linha "Desconhecido" para evitar NULL nas fatos (boa prática)
+-- LINHA PARA DESCONTINUAR O NULL (BOA PRÁTICA)
 INSERT IGNORE INTO dim_tempo (sk_tempo, data_referencia, mes, ano, trimestre) 
 VALUES (-1, NULL, NULL, NULL, NULL);
 
@@ -61,7 +61,7 @@ JOIN tb_pagamento p ON p.fk_mensalidade = mens.pk_mensalidade
 LEFT JOIN dim_tempo dt ON p.data_pagamento = dt.data_referencia   -- LEFT JOIN + COALESCE
 GROUP BY da.sk_aluno, dt.sk_tempo;
 
--- ÍNDICE PARA OTIMIZAR O EXPLAIN
+-- ÍNDICE PARA OTIMIZAR O EXPLAIN    
 
 CREATE INDEX idx_fato_desempenho_prof_nota 
 ON fato_desempenho (sk_professor, nota_media);
