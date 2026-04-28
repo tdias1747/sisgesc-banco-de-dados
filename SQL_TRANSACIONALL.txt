@@ -1,0 +1,15 @@
+-- TRANSACIONAL ( ROLLBACK SEM SUCESSO E COMMITE RESULTADO COM SUCESSO)
+
+START TRANSACTION;
+INSERT INTO tb_aluno (nome_aluno, cpf_aluno, email_aluno, data_nascimento_aluno) 
+VALUES ('Aluno Sem Valor', '00000000000', 'erro@teste.com', '2000-01-01');
+ROLLBACK; 
+
+SELECT * FROM tb_aluno WHERE nome_aluno = 'Aluno Sem Valor';
+
+START TRANSACTION;
+INSERT INTO tb_aluno (nome_aluno, cpf_aluno, email_aluno, data_nascimento_aluno) 
+VALUES ('Lucas Silva', '99988877766', 'lucas.s@estudante.com', '2005-01-01');
+COMMIT;
+
+SELECT * FROM tb_aluno WHERE nome_aluno = 'Lucas Silva';
