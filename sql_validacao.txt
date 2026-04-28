@@ -1,8 +1,0 @@
-CREATE INDEX idx_desempenho_nota ON fato_desempenho(nota_media);
-CREATE INDEX idx_financeiro_atraso ON fato_financeiro(dias_atraso);
-
--- Validação do Explain
-EXPLAIN SELECT p.nome_professor, AVG(f.nota_media) 
-FROM fato_desempenho f 
-JOIN dim_professor p ON f.sk_professor = p.sk_professor 
-GROUP BY p.nome_professor;
