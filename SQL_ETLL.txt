@@ -1,0 +1,96 @@
+-- INSERINDO DADOS NO ANALÍTICO + ETL
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE dim_aluno;
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+TRUNCATE TABLE fato_desempenho;
+
+TRUNCATE TABLE fato_frequencia;
+
+TRUNCATE TABLE fato_financeiro;
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE dim_professor;
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE dim_curso;
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE dim_tempo;
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- Carga das Dimensões
+INSERT INTO dim_aluno (nk_id_aluno, nome_aluno, status_aluno) 
+SELECT pk_aluno, nome_aluno, status_aluno FROM tb_aluno;
+
+INSERT INTO dim_professor (nk_id_professor, nome_professor, titulacao) 
+SELECT p.pk_professor, f.nome, p.titulacao 
+FROM tb_professor p JOIN tb_funcionario f ON p.fk_funcionario = f.pk_funcionario;
+
+INSERT INTO dim_curso (nk_id_curso, nome_curso, modalidade) 
+SELECT pk_curso, nome, modalidade FROM tb_curso;
+
+
+INSERT INTO dim_tempo (data_referencia, mes, ano, trimestre) 
+SELECT DISTINCT data_pagamento, MONTH(data_pagamento), YEAR(data_pagamento), QUARTER(data_pagamento) 
+FROM tb_pagamento; SELECT DISTINCT 
+    data_vencimento, 
+    MONTH(data_vencimento), 
+    YEAR(data_vencimento), 
+    QUARTER(data_vencimento) 
+FROM tb_mensalidade
+LIMIT 0, 25;
+
+
+
+INSERT IGNORE INTO dim_tempo (sk_tempo, data_referencia, mes, ano, trimestre) 
+VALUES (-1, NULL, NULL, NULL, NULL);
+
+-- Carga das Fatos
+INSERT INTO fato_desempenho (sk_aluno, sk_professor, sk_curso, sk_tempo, nota_media)
+SELECT da.sk_aluno, dp.sk_professor, dc.sk_curso, 1, ROUND(AVG(n.nota), 2)
+FROM tb_matricula m
+JOIN dim_aluno da ON m.fk_aluno = da.nk_id_aluno
+JOIN tb_turma t ON m.fk_turma = t.pk_turma
+JOIN dim_professor dp ON t.fk_professor = dp.nk_id_professor
+JOIN dim_curso dc ON t.fk_curso = dc.nk_id_curso
+JOIN tb_nota n ON n.fk_matricula = m.pk_matricula
+GROUP BY da.sk_aluno, dp.sk_professor, dc.sk_curso;
+
+INSERT INTO fato_frequencia (sk_aluno, sk_curso, sk_tempo, total_faltas)
+SELECT da.sk_aluno, dc.sk_curso, 1, SUM(fa.quantidade)
+FROM tb_matricula m
+JOIN dim_aluno da ON m.fk_aluno = da.nk_id_aluno
+JOIN tb_turma t ON m.fk_turma = t.pk_turma
+JOIN dim_curso dc ON t.fk_curso = dc.nk_id_curso
+JOIN tb_falta fa ON fa.fk_matricula = m.pk_matricula
+GROUP BY da.sk_aluno, dc.sk_curso;
+
+-- Carga fato_financeiro 
+
+INSERT INTO fato_financeiro (sk_aluno, sk_tempo, valor_pago, dias_atraso)
+SELECT 
+    da.sk_aluno,
+    COALESCE(dt.sk_tempo, -1) AS sk_tempo,   
+    SUM(p.valor_pago) AS valor_pago,
+    SUM(CASE 
+            WHEN p.data_pagamento > mens.data_vencimento 
+            THEN DATEDIFF(p.data_pagamento, mens.data_vencimento) 
+            ELSE 0 
+        END) AS dias_atraso_total
+FROM tb_mensalidade mens
+JOIN dim_aluno da ON mens.fk_aluno = da.nk_id_aluno
+JOIN tb_pagamento p ON p.fk_mensalidade = mens.pk_mensalidade
+LEFT JOIN dim_tempo dt ON p.data_pagamento = dt.data_referencia   
+GROUP BY da.sk_aluno, dt.sk_tempo;
