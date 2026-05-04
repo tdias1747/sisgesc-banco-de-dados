@@ -1,13 +1,1 @@
-CREATE INDEX  idx_fato_desempenho_prof_nota 
-ON fato_desempenho (sk_professor, nota_media);
 
-CREATE INDEX idx_fato_financeiro_aluno_atraso 
-ON fato_financeiro (sk_aluno, dias_atraso);
-
-CREATE INDEX  idx_fato_desempenho_aluno ON fato_desempenho(sk_aluno);
-CREATE INDEX  idx_fato_frequencia_aluno ON fato_frequencia(sk_aluno);
-
-EXPLAIN SELECT dp.nome_professor, AVG(fd.nota_media) 
-FROM fato_desempenho fd
-JOIN dim_professor dp ON fd.sk_professor = dp.sk_professor
-GROUP BY dp.nome_professor;
