@@ -1,16 +1,27 @@
+
+-- DESATIVA CHECAGEM DAS CHAVES
+
 SET FOREIGN_KEY_CHECKS = 0;
 
--- LIMPEZA TOTAL (PADRÃO)
-
+-- LIMPEZA TOTAL UTILIZANDO O DROP SE TIVER VALOR ELE SERÁ EXCLUÍDO 
 DROP TABLE IF EXISTS tb_carga_horaria_docente, tb_vinculos_professor_disciplina, tb_professor, tb_funcionario;
 DROP TABLE IF EXISTS tb_inadimplencia, tb_contas_receber, tb_pagamento, tb_mensalidade, tb_contrato_educacional;
 DROP TABLE IF EXISTS tb_horario_grade, tb_falta, tb_nota, tb_matricula, tb_turma, tb_disciplina, tb_curso, tb_aluno;
 DROP TABLE IF EXISTS fato_desempenho, fato_frequencia, fato_financeiro, dim_aluno, dim_professor, dim_curso, dim_tempo;
 
+-- REATIVAR A CHECAGEM DAS CHAVES
 SET FOREIGN_KEY_CHECKS = 1;
 
 
--- CRIAÇÃO DO OPERACIONAL (vindo do oltp)
+-- CRIAÇÃO DAS TABELAS DO OPERACIONAL (CRIANDO TABELA DO OPERACIONAL, vindo do DIAGRAMA oltp)
+
+-- PK É UMA CHAVE ÚNICA QUE SERVE PARA MELHORAR A A PROCURA DE ALGO EM UMA TABELA (MELHORIA NO DESEMPENHO)
+
+-- O AUTO INCREMENT GERA UM VALOR DEPOIS QUE VOCÊ INSERE UM DADO
+
+-- O NOT NULL UNIQUE GARANTE VALOR NO CAMPO E DADOS ÚNICOS.
+
+-- CHECK SERVE PARA CHECAR UMA OPÇÃO ANTES DELA SER APLICADA
 
 
 CREATE TABLE tb_aluno (
