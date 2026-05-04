@@ -1,0 +1,593 @@
+CREATE DATABASE IF NOT EXISTS sisgesc;
+USE sisgesc;
+
+-- Desativa a checagem de chaves estrangeiras para permitir a limpeza total
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Remove a View se já existir
+DROP VIEW IF EXISTS vw_inadimplencia_detalhada;
+
+-- Remove todas as tabelas do Operacional e do Analítico 
+DROP TABLE IF EXISTS tb_carga_horaria_docente, tb_vinculos_professor_disciplina, tb_professor, tb_funcionario;
+DROP TABLE IF EXISTS tb_inadimplencia, tb_contas_receber, tb_pagamento, tb_mensalidade, tb_contrato_educacional;
+DROP TABLE IF EXISTS tb_horario_grade, tb_falta, tb_nota, tb_matricula, tb_turma, tb_disciplina, tb_curso;
+DROP TABLE IF EXISTS tb_telefone_aluno, tb_email_aluno, tb_aluno;
+DROP TABLE IF EXISTS fato_desempenho, fato_frequencia, fato_financeiro, dim_aluno, dim_professor, dim_curso, dim_tempo;
+
+-- Reativa a checagem de chaves estrangeiras
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- 1. CRIAÇÃO DO OPERACIONAL (OLTP) - Módulo Acadêmico
+
+-- UTILIZAÇÃO DO CHECK PARA PROTEÇÃO DE DADOS (NÃO OCORRER ERRO, CASO OCORRA ELE RETORNA ERRO)
+
+-- UTILIZAÇÃO DO CURRENTTIME PARA JUSTAMENTE TER O TEMPO REAL
+
+-- A UTILIZAÇÃO DO FOREIGN KEY E REFERENCES PARA NÃO TER DADOS ORFÃOS E CRIAÇÃO DE VÍNCULO
+
+
+CREATE TABLE tb_aluno (
+  pk_aluno INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  primeiro_nome_aluno VARCHAR(50) NOT NULL,
+  sobrenome_aluno VARCHAR(100) NOT NULL,
+  cpf_aluno VARCHAR(11) NOT NULL UNIQUE,
+  data_nascimento_aluno DATE NOT NULL,
+  status_aluno VARCHAR(20) DEFAULT 'Ativo' CHECK (status_aluno IN ('Ativo', 'Trancado', 'Formado', 'Desligado')),
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE tb_email_aluno (
+  pk_email INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_aluno INT NOT NULL,
+  endereco_email VARCHAR(200) NOT NULL UNIQUE,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_aluno) REFERENCES tb_aluno(pk_aluno)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE tb_telefone_aluno (
+  pk_telefone INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_aluno INT NOT NULL,
+  numero_telefone VARCHAR(20) NOT NULL,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_aluno) REFERENCES tb_aluno(pk_aluno)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE tb_curso (
+  pk_curso INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(200) NOT NULL,
+  modalidade VARCHAR(20) NOT NULL CHECK (modalidade IN ('Presencial', 'EAD')),
+  carga_horaria_curso DECIMAL(6,2) NOT NULL,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE tb_disciplina (
+  pk_disciplina INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_curso INT NOT NULL,
+  nome VARCHAR(200) NOT NULL,
+  carga_horaria DECIMAL(6,2) NOT NULL,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_curso) REFERENCES tb_curso(pk_curso)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Módulo RH
+
+
+CREATE TABLE tb_funcionario (
+  pk_funcionario INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  primeiro_nome VARCHAR(50) NOT NULL,
+  sobrenome VARCHAR(100) NOT NULL,
+  cpf VARCHAR(11) NOT NULL UNIQUE,
+  cargo VARCHAR(100) NOT NULL,
+  salario DECIMAL(10,2) NOT NULL CHECK (salario > 0),
+  data_admissao DATE NOT NULL,
+  status_func VARCHAR(20) DEFAULT 'Ativo' CHECK (status_func IN ('Ativo', 'Inativo', 'Demitido', 'Afastado')),
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE tb_professor (
+  pk_professor INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_funcionario INT NOT NULL UNIQUE,
+  titulacao VARCHAR(50) NOT NULL,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_funcionario) REFERENCES tb_funcionario(pk_funcionario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE tb_vinculos_professor_disciplina (
+  fk_professor INT NOT NULL,
+  fk_disciplina INT NOT NULL,
+  status_vinculo VARCHAR(20) DEFAULT 'Ativo' CHECK (status_vinculo IN ('Ativo', 'Inativo')),
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (fk_professor, fk_disciplina),
+  FOREIGN KEY (fk_professor) REFERENCES tb_professor(pk_professor),
+  FOREIGN KEY (fk_disciplina) REFERENCES tb_disciplina(pk_disciplina)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE tb_carga_horaria_docente (
+  pk_carga INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_professor INT NOT NULL,
+  horas_aula DECIMAL(6,2) NOT NULL,
+  horas_pesquisa DECIMAL(6,2) DEFAULT 0.00,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_professor) REFERENCES tb_professor(pk_professor)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Módulo Acadêmico 
+
+
+CREATE TABLE tb_turma (
+  pk_turma INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_disciplina INT NOT NULL,
+  fk_professor INT NOT NULL,
+  fk_curso INT NOT NULL,
+  semestre VARCHAR(6) NOT NULL,
+  ano INT NOT NULL,
+  vaga_max INT DEFAULT 40,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_disciplina) REFERENCES tb_disciplina(pk_disciplina),
+  FOREIGN KEY (fk_professor) REFERENCES tb_professor(pk_professor),
+  FOREIGN KEY (fk_curso) REFERENCES tb_curso(pk_curso)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE tb_matricula (
+  fk_aluno INT NOT NULL,
+  fk_turma INT NOT NULL,
+  data_matricula DATE DEFAULT (CURRENT_DATE),
+  status_matr VARCHAR(20) DEFAULT 'Ativa' CHECK (status_matr IN ('Ativa', 'Trancada', 'Cancelada', 'Concluída')),
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (fk_aluno, fk_turma),
+  FOREIGN KEY (fk_aluno) REFERENCES tb_aluno(pk_aluno),
+  FOREIGN KEY (fk_turma) REFERENCES tb_turma(pk_turma)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE tb_nota (
+  fk_aluno INT NOT NULL,
+  fk_turma INT NOT NULL,
+  tipo_avaliacao VARCHAR(50) NOT NULL,
+  nota DECIMAL(4,2) NOT NULL CHECK (nota BETWEEN 0 AND 10),
+  data_avaliacao DATE DEFAULT (CURRENT_DATE),
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (fk_aluno, fk_turma, tipo_avaliacao),
+  FOREIGN KEY (fk_aluno, fk_turma) REFERENCES tb_matricula(fk_aluno, fk_turma)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE tb_falta (
+  fk_aluno INT NOT NULL,
+  fk_turma INT NOT NULL,
+  data_falta DATE NOT NULL,
+  quantidade INT NOT NULL DEFAULT 1,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (fk_aluno, fk_turma, data_falta),
+  FOREIGN KEY (fk_aluno, fk_turma) REFERENCES tb_matricula(fk_aluno, fk_turma)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE tb_horario_grade (
+  pk_grade INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_turma INT NOT NULL,
+  dia_semana VARCHAR(15) CHECK (dia_semana IN ('Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo')),
+  horario_inicio TIME NOT NULL,
+  horario_fim TIME NOT NULL,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_turma) REFERENCES tb_turma(pk_turma)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Módulo Financeiro
+
+
+CREATE TABLE tb_contrato_educacional (
+  pk_contrato INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_aluno INT NOT NULL,
+  fk_curso INT NOT NULL,
+  valor_total DECIMAL(10,2) NOT NULL,
+  status_finan VARCHAR(20) DEFAULT 'Vigente' CHECK (status_finan IN ('Vigente', 'Encerrado', 'Cancelado')),
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_aluno) REFERENCES tb_aluno(pk_aluno),
+  FOREIGN KEY (fk_curso) REFERENCES tb_curso(pk_curso)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE tb_mensalidade (
+  pk_mensalidade INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_contrato INT NOT NULL,
+  fk_aluno INT NOT NULL,
+  valor DECIMAL(10,2) NOT NULL,
+  data_vencimento DATE NOT NULL,
+  status_mensal VARCHAR(20) DEFAULT 'Pendente' CHECK (status_mensal IN ('Pendente', 'Pago', 'Atrasado', 'Negociado')),
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_contrato) REFERENCES tb_contrato_educacional(pk_contrato),
+  FOREIGN KEY (fk_aluno) REFERENCES tb_aluno(pk_aluno)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE tb_pagamento (
+  pk_pagamento INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_mensalidade INT NOT NULL,
+  data_pagamento DATE NOT NULL,
+  valor_pago DECIMAL(10,2) NOT NULL,
+  forma_pagamento VARCHAR(50) DEFAULT 'Cartão' CHECK (forma_pagamento IN ('Cartão', 'Boleto', 'PIX', 'Dinheiro')),
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_mensalidade) REFERENCES tb_mensalidade(pk_mensalidade)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE tb_contas_receber (
+  pk_conta INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_mensalidade INT NOT NULL,
+  valor_devido DECIMAL(10,2) NOT NULL,
+  status_conta VARCHAR(20) DEFAULT 'Aberto' CHECK (status_conta IN ('Aberto', 'Pago', 'Cancelado')),
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_mensalidade) REFERENCES tb_mensalidade(pk_mensalidade)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE tb_inadimplencia (
+  pk_inadimplencia INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_aluno INT NOT NULL,
+  fk_mensalidade INT NOT NULL,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (fk_aluno) REFERENCES tb_aluno(pk_aluno),
+  FOREIGN KEY (fk_mensalidade) REFERENCES tb_mensalidade(pk_mensalidade)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+--  VIEW FINANCEIRA
+
+-- CALCULA A MULTA DE FORMA DINÂMICA GERANDO LISTA DE QUEM DEVE ALGUM VALOR E CALCULO EM TEMPO REAL
+
+CREATE VIEW vw_inadimplencia_detalhada AS
+SELECT
+    i.pk_inadimplencia,
+    i.fk_aluno,
+    a.primeiro_nome_aluno,
+    a.sobrenome_aluno,
+    i.fk_mensalidade,
+    m.data_vencimento,
+    m.valor,
+    DATEDIFF(CURRENT_DATE, m.data_vencimento) AS dias_atraso,
+    ROUND((m.valor * 0.02) + (m.valor * 0.0033 * DATEDIFF(CURRENT_DATE, m.data_vencimento)), 2) AS valor_multa_estimado
+FROM tb_inadimplencia i
+JOIN tb_mensalidade m ON i.fk_mensalidade = m.pk_mensalidade
+JOIN tb_aluno a ON i.fk_aluno = a.pk_aluno
+WHERE m.status_mensal IN ('Pendente', 'Atrasado') AND m.data_vencimento < CURRENT_DATE;
+
+
+-- 3. INSERÇÃO DE DADOS NO OPERACIONAL (CARGA NOS DADOS DA OLTP)
+
+-- Carga de Funcionários e Professores
+INSERT IGNORE INTO tb_funcionario (primeiro_nome, sobrenome, cpf, cargo, salario, data_admissao) VALUES
+('Carlos Roberto', 'Rochedo', '11111111111', 'Professor', 5500.00, '2023-02-15'),
+('Ana Paula', 'Dias', '22222222222', 'Professor', 5300.00, '2023-05-19'),
+('Marcos Batista', 'Machado', '33333333333', 'Professor', 6000.00, '2022-11-25');
+
+INSERT IGNORE INTO tb_professor (fk_funcionario, titulacao) VALUES
+(1, 'Doutorado'), (2, 'Mestrado'), (3, 'Doutorado');
+
+-- Carga de Cursos e Disciplinas
+INSERT IGNORE INTO tb_curso (nome, modalidade, carga_horaria_curso) VALUES
+('Análise e Desenvolvimento de Sistemas', 'Presencial', 2000.00),
+('Engenharia de Software', 'EAD', 3200.00);
+
+INSERT IGNORE INTO tb_disciplina (fk_curso, nome, carga_horaria) VALUES
+(1, 'Banco de Dados', 80.00),
+(1, 'Programação Java', 80.00),
+(2, 'Engenharia de Requisitos', 60.00);
+
+-- Carga de Turmas e Grades
+INSERT IGNORE INTO tb_turma (fk_disciplina, fk_professor, fk_curso, semestre, ano) VALUES
+(1, 1, 1, '2026/1', 2026),
+(3, 2, 2, '2026/1', 2026),
+(2, 3, 1, '2026/1', 2026);
+
+INSERT IGNORE INTO tb_horario_grade (fk_turma, dia_semana, horario_inicio, horario_fim) VALUES
+(1, 'Segunda', '19:00', '22:30'),
+(2, 'Terça', '19:00', '21:00');
+
+-- Carga de Alunos e Contatos 
+INSERT IGNORE INTO tb_aluno (primeiro_nome_aluno, sobrenome_aluno, cpf_aluno, data_nascimento_aluno, status_aluno) VALUES
+('Thomas Dias', 'Batista', '12345678901', '2007-02-22', 'Ativo'),
+('Lucas Ferreira', 'Machado', '11122233344', '2005-08-15', 'Ativo'),
+('Juliana Rocha', 'Costa', '55566677788', '2004-03-12', 'Ativo'),
+('Gabriel Ferreira', 'Almeida', '98765432100', '2003-11-30', 'Trancado');
+
+INSERT IGNORE INTO tb_email_aluno (fk_aluno, endereco_email) VALUES
+(1, 'thomasdias@estudante.com'),
+(2, 'lucasmachado@estudante.com'),
+(3, 'juliarocha@estudante.com'),
+(4, 'gabrielbatista@estudante.com');
+
+INSERT IGNORE INTO tb_telefone_aluno (fk_aluno, numero_telefone) VALUES
+(1, '11911112222'), (2, '11933334444'), (3, '11955556666'), (4, '11977778888');
+
+-- Matrículas e Notas
+INSERT IGNORE INTO tb_matricula (fk_aluno, fk_turma) VALUES
+(1, 1), (2, 1), (3, 3), (4, 2);
+
+INSERT IGNORE INTO tb_nota (fk_aluno, fk_turma, tipo_avaliacao, nota, data_avaliacao) VALUES
+(1, 1, 'Prova 1', 9.50, '2026-03-15'),
+(2, 1, 'Prova 1', 8.75, '2026-03-15'),
+(3, 3, 'Prova 1', 7.20, '2026-03-20'),
+(4, 2, 'Prova 1', 4.50, '2026-03-18');
+
+INSERT IGNORE INTO tb_falta (fk_aluno, fk_turma, data_falta, quantidade) VALUES
+(1, 1, '2026-03-10', 2),
+(2, 1, '2026-03-10', 4),
+(3, 3, '2026-03-11', 1),
+(4, 2, '2026-03-12', 3);
+
+-- Financeiro
+INSERT IGNORE INTO tb_contrato_educacional (fk_aluno, fk_curso, valor_total) VALUES
+(1, 1, 12000.00), (2, 1, 12000.00), (3, 1, 12000.00), (4, 2, 10200.00);
+
+INSERT IGNORE INTO tb_mensalidade (fk_contrato, fk_aluno, valor, data_vencimento, status_mensal) VALUES
+(1, 1, 1000.00, '2026-04-10', 'Pendente'),
+(2, 2, 1000.00, '2026-04-10', 'Pendente'),
+(3, 3, 1000.00, '2026-04-10', 'Pendente'),
+(4, 4, 850.00, '2026-04-10', 'Pendente');
+
+INSERT IGNORE INTO tb_pagamento (fk_mensalidade, data_pagamento, valor_pago, forma_pagamento) VALUES
+(1, '2026-04-11', 1000.00, 'PIX'),
+(2, '2026-04-10', 1000.00, 'Boleto'),
+(3, '2026-04-08', 1000.00, 'Cartão'),
+(4, '2026-04-25', 850.00, 'PIX');
+
+
+-- ATUALIZAÇÃO DE STATUS FINANCEIRO PARA QUE O VIEW POSSA ATUALIZAR OS DADOS DA INADIMPLÊNCIA
+
+
+UPDATE tb_mensalidade SET status_mensal = 'Pago'     WHERE pk_mensalidade IN (1, 3, 4);
+UPDATE tb_mensalidade SET status_mensal = 'Atrasado' WHERE pk_mensalidade = 2;
+
+INSERT IGNORE INTO tb_contas_receber (fk_mensalidade, valor_devido, status_conta) VALUES
+(2, 1000.00, 'Aberto');
+
+INSERT IGNORE INTO tb_inadimplencia (fk_aluno, fk_mensalidade) VALUES (2, 2);
+
+-- Vínculos e Carga Horária Docente
+INSERT IGNORE INTO tb_vinculos_professor_disciplina (fk_professor, fk_disciplina) VALUES (1, 1), (2, 3);
+
+INSERT IGNORE INTO tb_carga_horaria_docente (fk_professor, horas_aula, horas_pesquisa) VALUES
+(1, 40.00, 10.00),
+(2, 30.00, 5.00);
+
+-- CONSULTAS OLTP (TRANSACIONAL)
+
+-- SELECT PARA LISTAR TODOS OS ALUNOS
+
+SELECT primeiro_nome_aluno, sobrenome_aluno, cpf_aluno, status_aluno
+FROM tb_aluno;
+
+-- SUBSELECT PARA VISUALIZAÇÃO DE ALUNOS ACIMA DA MÉDIA
+
+SELECT a.primeiro_nome_aluno, a.sobrenome_aluno
+FROM tb_aluno a
+WHERE a.pk_aluno IN (
+    SELECT m.fk_aluno
+    FROM tb_mensalidade m
+    WHERE m.valor > (SELECT AVG(valor) FROM tb_mensalidade)
+);
+
+-- CONTROLE TRANSACIONAL (ACID)
+
+
+
+-- ROLLBACK - SIMULA UM ERRO E NÃO GARANTE A INSERÇÃO DESSES DADOS NO BANCO
+
+START TRANSACTION;
+INSERT IGNORE INTO tb_aluno (primeiro_nome_aluno, sobrenome_aluno, cpf_aluno, data_nascimento_aluno)
+VALUES ('Aluno', 'Teste Rollback', '00000000000', '2002-01-02');
+ROLLBACK;
+
+
+SELECT * FROM tb_aluno WHERE cpf_aluno = '00000000000';
+
+-- COMMIT - SIMULA A INSERÇÃO DE UM VALOR CORRETO E A IMPLEMENTAÇÃO NO BANCO
+START TRANSACTION;
+INSERT IGNORE INTO tb_aluno (primeiro_nome_aluno, sobrenome_aluno, cpf_aluno, data_nascimento_aluno)
+VALUES ('Thomas', 'Silva', '99988877766', '2007-01-03');
+COMMIT;
+
+SELECT * FROM tb_aluno WHERE cpf_aluno = '99988877766';
+
+--  CRIAÇÃO DAS TABELAS ANALÍTICAS (VINDO DIRETAMENTE DO DIAGRAMA OLAP)
+
+-- AS NK SÃO AS CHAVES NATURAIS QUE SE REFEREM A DADOS QUE ESTÃO PRESENTES NO MUNDO REAL E VINDO DO OLTP (DADOS QUE SÃO FAMILIARES PARA O USUÁRIO)
+
+-- AS SK SERVEM PARA DADOS QUE NÃO ESTÃO PRESENTES NO MUNDO REAL E QUE NORMAMLMENTE VEM DO OLAP, ALÉM DE SERVIREM COMO ELO PARA QUE O FATO SE CONECTE COM A DIMENSÃO (DADOS QUE NÃO PODEM SER MUDADOS E QUE SÃO FAMILIARES COM O SISTEMA)
+
+-- AUTO INCREMENT INSERE DADOS POSTERIORES DOS PRESENTES
+
+-- Dimensões (Contexto Analítico)
+CREATE TABLE IF NOT EXISTS dim_aluno (
+    sk_aluno INT AUTO_INCREMENT PRIMARY KEY,
+    nk_id_aluno INT,
+    nome_aluno VARCHAR(150),
+    status_aluno VARCHAR(20)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS dim_professor (
+    sk_professor INT AUTO_INCREMENT PRIMARY KEY,
+    nk_id_professor INT,
+    nome_professor VARCHAR(150),
+    titulacao VARCHAR(50)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS dim_curso (
+    sk_curso INT AUTO_INCREMENT PRIMARY KEY,
+    nk_id_curso INT,
+    nome_curso VARCHAR(200),
+    modalidade VARCHAR(20)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS dim_tempo (
+    sk_tempo INT AUTO_INCREMENT PRIMARY KEY,
+    data_referencia DATE,
+    mes INT,
+    ano INT,
+    trimestre INT,
+    semestre VARCHAR(6)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabelas Fato (Métricas)
+CREATE TABLE IF NOT EXISTS fato_desempenho (
+    sk_fato INT AUTO_INCREMENT PRIMARY KEY,
+    sk_aluno INT,
+    sk_professor INT,
+    sk_curso INT,
+    sk_tempo INT,
+    nota_media DECIMAL(4,2),
+    FOREIGN KEY (sk_aluno)     REFERENCES dim_aluno(sk_aluno),
+    FOREIGN KEY (sk_professor) REFERENCES dim_professor(sk_professor),
+    FOREIGN KEY (sk_curso)     REFERENCES dim_curso(sk_curso),
+    FOREIGN KEY (sk_tempo)     REFERENCES dim_tempo(sk_tempo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS fato_frequencia (
+    sk_fato INT AUTO_INCREMENT PRIMARY KEY,
+    sk_aluno INT,
+    sk_curso INT,
+    sk_tempo INT,
+    total_faltas INT,
+    FOREIGN KEY (sk_aluno) REFERENCES dim_aluno(sk_aluno),
+    FOREIGN KEY (sk_curso) REFERENCES dim_curso(sk_curso),
+    FOREIGN KEY (sk_tempo) REFERENCES dim_tempo(sk_tempo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS fato_financeiro (
+    sk_fato INT AUTO_INCREMENT PRIMARY KEY,
+    sk_aluno INT,
+    sk_tempo INT,
+    valor_pago DECIMAL(10,2),
+    dias_atraso INT,
+    FOREIGN KEY (sk_aluno) REFERENCES dim_aluno(sk_aluno),
+    FOREIGN KEY (sk_tempo) REFERENCES dim_tempo(sk_tempo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--  ETL - EXTRAÇÃO, TRANSFORMAÇÃO E CARGA (UTILIZAÇÃO DO FROM, INSERT E SELECT)
+
+-- O JOIN FOI UTILZADO PARA TRAZER INFORMAÇÕES PRECISAS QUE EXISTEM REALMENTE
+
+-- JOIN LEFT FOI UTILIZADO PARA QUE MESMO QUE NÃO POSSUA ALGO ELE FAÇA A DETERMINADA AÇÃO
+
+-- O GROUP BY FOI UTILIZADO PARA RESUMIR DADOS MUITOS EXTENSOS E DESSES DADOS FAZER AS DEVIDAS AÇÕES
+
+-- Limpeza total do Analítico antes da nova carga
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE fato_desempenho;
+TRUNCATE TABLE fato_frequencia;
+TRUNCATE TABLE fato_financeiro;
+TRUNCATE TABLE dim_aluno;
+TRUNCATE TABLE dim_professor;
+TRUNCATE TABLE dim_curso;
+TRUNCATE TABLE dim_tempo;
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Carga das Dimensões
+INSERT INTO dim_aluno (nk_id_aluno, nome_aluno, status_aluno)
+SELECT pk_aluno, CONCAT(primeiro_nome_aluno, ' ', sobrenome_aluno), status_aluno
+FROM tb_aluno;
+
+INSERT INTO dim_professor (nk_id_professor, nome_professor, titulacao)
+SELECT p.pk_professor, CONCAT(f.primeiro_nome, ' ', f.sobrenome), p.titulacao
+FROM tb_professor p
+JOIN tb_funcionario f ON p.fk_funcionario = f.pk_funcionario;
+
+INSERT INTO dim_curso (nk_id_curso, nome_curso, modalidade)
+SELECT pk_curso, nome, modalidade
+FROM tb_curso;
+
+-- DIMENSÃO TEMPO EXTRAÇÃO DE DADOS BASEADA NO TEMPO DE PAGAMENTO
+
+INSERT INTO dim_tempo (data_referencia, mes, ano, trimestre, semestre)
+SELECT DISTINCT
+    data_pagamento,
+    MONTH(data_pagamento),
+    YEAR(data_pagamento),
+    QUARTER(data_pagamento),
+    CONCAT(YEAR(data_pagamento), '/', CEIL(MONTH(data_pagamento) / 6))
+FROM tb_pagamento;
+
+-- Carga da Fato Desempenho
+INSERT INTO fato_desempenho (sk_aluno, sk_professor, sk_curso, sk_tempo, nota_media)
+SELECT da.sk_aluno, dp.sk_professor, dc.sk_curso, 1, ROUND(AVG(n.nota), 2)
+FROM tb_nota n
+JOIN dim_aluno    da ON n.fk_aluno       = da.nk_id_aluno
+JOIN tb_turma      t ON n.fk_turma       = t.pk_turma
+JOIN dim_professor dp ON t.fk_professor   = dp.nk_id_professor
+JOIN dim_curso    dc ON t.fk_curso       = dc.nk_id_curso
+GROUP BY da.sk_aluno, dp.sk_professor, dc.sk_curso;
+
+-- Carga da Fato Frequência
+INSERT INTO fato_frequencia (sk_aluno, sk_curso, sk_tempo, total_faltas)
+SELECT da.sk_aluno, dc.sk_curso, 1, SUM(fa.quantidade)
+FROM tb_falta fa
+JOIN dim_aluno da ON fa.fk_aluno  = da.nk_id_aluno
+JOIN tb_turma   t ON fa.fk_turma  = t.pk_turma
+JOIN dim_curso dc ON t.fk_curso   = dc.nk_id_curso
+GROUP BY da.sk_aluno, dc.sk_curso;
+
+-- Carga da Fato Financeiro ( CÁLCULO PARA DIFERENCIAR DATA DE PAGAMENTO COM O VENCIMENTO)
+
+-- O COALESCE COLOCA VALORES CASO NÃO ENCONTRE ALGO QUE PROCURA (EX:1) 
+
+INSERT INTO fato_financeiro (sk_aluno, sk_tempo, valor_pago, dias_atraso)
+SELECT
+    da.sk_aluno,
+    COALESCE(dt.sk_tempo, 1),
+    SUM(p.valor_pago),
+    SUM(CASE
+        WHEN p.data_pagamento > mens.data_vencimento
+        THEN DATEDIFF(p.data_pagamento, mens.data_vencimento)
+        ELSE 0
+    END)
+FROM tb_mensalidade mens
+JOIN dim_aluno  da ON mens.fk_aluno        = da.nk_id_aluno
+JOIN tb_pagamento p ON p.fk_mensalidade    = mens.pk_mensalidade
+LEFT JOIN dim_tempo dt ON p.data_pagamento = dt.data_referencia
+GROUP BY da.sk_aluno, dt.sk_tempo;
+
+-- ÍNDICES E PERFORMANCE
+ 
+-- USO DE INDEX PARA OTIMIZAR O BANCO DE DADOS
+
+
+-- Limpeza e Recriação dos índices para evitar erros de duplicidade
+DROP INDEX IF EXISTS indx_fato_desempenho_aluno ON fato_desempenho;
+CREATE INDEX indx_fato_desempenho_aluno ON fato_desempenho(sk_aluno);
+
+DROP INDEX IF EXISTS indx_fato_desempenho_prof ON fato_desempenho;
+CREATE INDEX indx_fato_desempenho_prof  ON fato_desempenho(sk_professor);
+
+DROP INDEX IF EXISTS indx_fato_financeiro_aluno ON fato_financeiro;
+CREATE INDEX indx_fato_financeiro_aluno ON fato_financeiro(sk_aluno);
+
+DROP INDEX IF EXISTS indx_fato_frequencia_aluno ON fato_frequencia;
+CREATE INDEX indx_fato_frequencia_aluno ON fato_frequencia(sk_aluno);
+
+-- Validação de Performance via EXPLAIN para verificar o uso dos índices
+EXPLAIN SELECT dp.nome_professor, AVG(fd.nota_media)
+FROM fato_desempenho fd
+JOIN dim_professor dp ON fd.sk_professor = dp.sk_professor -- IRÁ EXPLANAR ALL POR CAUSA DO BAIXO NÚMERO DE DADOS NAS TABELAS DO BANCO 
+GROUP BY dp.nome_professor;
+
+EXPLAIN SELECT * FROM fato_desempenho WHERE sk_professor = 1; -- MOSTRAGEM DO RESULTADO REF PROVANDO QUE SE TIVESSE GRANDES NÚMEROS DE DADOS RESULTARIA EM ref
