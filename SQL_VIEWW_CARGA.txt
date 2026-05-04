@@ -1,0 +1,120 @@
+--  VIEW FINANCEIRA
+
+-- CALCULA A MULTA DE FORMA DINÂMICA GERANDO LISTA DE QUEM DEVE ALGUM VALOR E CALCULO EM TEMPO REAL
+
+CREATE VIEW vw_inadimplencia_detalhada AS
+SELECT
+    i.pk_inadimplencia,
+    i.fk_aluno,
+    a.primeiro_nome_aluno,
+    a.sobrenome_aluno,
+    i.fk_mensalidade,
+    m.data_vencimento,
+    m.valor,
+    DATEDIFF(CURRENT_DATE, m.data_vencimento) AS dias_atraso,
+    ROUND((m.valor * 0.02) + (m.valor * 0.0033 * DATEDIFF(CURRENT_DATE, m.data_vencimento)), 2) AS valor_multa_estimado
+FROM tb_inadimplencia i
+JOIN tb_mensalidade m ON i.fk_mensalidade = m.pk_mensalidade
+JOIN tb_aluno a ON i.fk_aluno = a.pk_aluno
+WHERE m.status_mensal IN ('Pendente', 'Atrasado') AND m.data_vencimento < CURRENT_DATE;
+
+
+-- INSERÇÃO DE DADOS NO OPERACIONAL (CARGA NOS DADOS DA OLTP)
+
+-- Carga de Funcionários e Professores
+INSERT IGNORE INTO tb_funcionario (primeiro_nome, sobrenome, cpf, cargo, salario, data_admissao) VALUES
+('Carlos Roberto', 'Rochedo', '11111111111', 'Professor', 5500.00, '2023-02-15'),
+('Ana Paula', 'Dias', '22222222222', 'Professor', 5300.00, '2023-05-19'),
+('Marcos Batista', 'Machado', '33333333333', 'Professor', 6000.00, '2022-11-25');
+
+INSERT IGNORE INTO tb_professor (fk_funcionario, titulacao) VALUES
+(1, 'Doutorado'), (2, 'Mestrado'), (3, 'Doutorado');
+
+-- Carga de Cursos e Disciplinas
+INSERT IGNORE INTO tb_curso (nome, modalidade, carga_horaria_curso) VALUES
+('Análise e Desenvolvimento de Sistemas', 'Presencial', 2000.00),
+('Engenharia de Software', 'EAD', 3200.00);
+
+INSERT IGNORE INTO tb_disciplina (fk_curso, nome, carga_horaria) VALUES
+(1, 'Banco de Dados', 80.00),
+(1, 'Programação Java', 80.00),
+(2, 'Engenharia de Requisitos', 60.00);
+
+-- Carga de Turmas e Grades
+INSERT IGNORE INTO tb_turma (fk_disciplina, fk_professor, fk_curso, semestre, ano) VALUES
+(1, 1, 1, '2026/1', 2026),
+(3, 2, 2, '2026/1', 2026),
+(2, 3, 1, '2026/1', 2026);
+
+INSERT IGNORE INTO tb_horario_grade (fk_turma, dia_semana, horario_inicio, horario_fim) VALUES
+(1, 'Segunda', '19:00', '22:30'),
+(2, 'Terça', '19:00', '21:00');
+
+-- Carga de Alunos e Contatos 
+INSERT IGNORE INTO tb_aluno (primeiro_nome_aluno, sobrenome_aluno, cpf_aluno, data_nascimento_aluno, status_aluno) VALUES
+('Thomas Dias', 'Batista', '12345678901', '2007-02-22', 'Ativo'),
+('Lucas Ferreira', 'Machado', '11122233344', '2005-08-15', 'Ativo'),
+('Juliana Rocha', 'Costa', '55566677788', '2004-03-12', 'Ativo'),
+('Gabriel Ferreira', 'Almeida', '98765432100', '2003-11-30', 'Trancado');
+
+INSERT IGNORE INTO tb_email_aluno (fk_aluno, endereco_email) VALUES
+(1, 'thomasdias@estudante.com'),
+(2, 'lucasmachado@estudante.com'),
+(3, 'juliarocha@estudante.com'),
+(4, 'gabrielbatista@estudante.com');
+
+INSERT IGNORE INTO tb_telefone_aluno (fk_aluno, numero_telefone) VALUES
+(1, '11911112222'), (2, '11933334444'), (3, '11955556666'), (4, '11977778888');
+
+-- Matrículas e Notas
+INSERT IGNORE INTO tb_matricula (fk_aluno, fk_turma) VALUES
+(1, 1), (2, 1), (3, 3), (4, 2);
+
+INSERT IGNORE INTO tb_nota (fk_aluno, fk_turma, tipo_avaliacao, nota, data_avaliacao) VALUES
+(1, 1, 'Prova 1', 9.50, '2026-03-15'),
+(2, 1, 'Prova 1', 8.75, '2026-03-15'),
+(3, 3, 'Prova 1', 7.20, '2026-03-20'),
+(4, 2, 'Prova 1', 4.50, '2026-03-18');
+
+INSERT IGNORE INTO tb_falta (fk_aluno, fk_turma, data_falta, quantidade) VALUES
+(1, 1, '2026-03-10', 2),
+(2, 1, '2026-03-10', 4),
+(3, 3, '2026-03-11', 1),
+(4, 2, '2026-03-12', 3);
+
+-- Financeiro
+INSERT IGNORE INTO tb_contrato_educacional (fk_aluno, fk_curso, valor_total) VALUES
+(1, 1, 12000.00), (2, 1, 12000.00), (3, 1, 12000.00), (4, 2, 10200.00);
+
+INSERT IGNORE INTO tb_mensalidade (fk_contrato, fk_aluno, valor, data_vencimento, status_mensal) VALUES
+(1, 1, 1000.00, '2026-04-10', 'Pendente'),
+(2, 2, 1000.00, '2026-04-10', 'Pendente'),
+(3, 3, 1000.00, '2026-04-10', 'Pendente'),
+(4, 4, 850.00, '2026-04-10', 'Pendente');
+
+INSERT IGNORE INTO tb_pagamento (fk_mensalidade, data_pagamento, valor_pago, forma_pagamento) VALUES
+(1, '2026-04-11', 1000.00, 'PIX'),
+(2, '2026-04-10', 1000.00, 'Boleto'),
+(3, '2026-04-08', 1000.00, 'Cartão'),
+(4, '2026-04-25', 850.00, 'PIX');
+
+
+-- ATUALIZAÇÃO DE STATUS FINANCEIRO PARA QUE O VIEW POSSA ATUALIZAR OS DADOS DA INADIMPLÊNCIA
+
+
+UPDATE tb_mensalidade SET status_mensal = 'Pago'     WHERE pk_mensalidade IN (1, 3, 4);
+UPDATE tb_mensalidade SET status_mensal = 'Atrasado' WHERE pk_mensalidade = 2;
+
+INSERT IGNORE INTO tb_contas_receber (fk_mensalidade, valor_devido, status_conta) VALUES
+(2, 1000.00, 'Aberto');
+
+INSERT IGNORE INTO tb_inadimplencia (fk_aluno, fk_mensalidade) VALUES (2, 2);
+
+-- Vínculos e Carga Horária Docente
+INSERT IGNORE INTO tb_vinculos_professor_disciplina (fk_professor, fk_disciplina) VALUES (1, 1), (2, 3);
+
+INSERT IGNORE INTO tb_carga_horaria_docente (fk_professor, horas_aula, horas_pesquisa) VALUES
+(1, 40.00, 10.00),
+(2, 30.00, 5.00);
+
+
