@@ -1,4 +1,6 @@
--- INSERINDO DADOS NO ANALÍTICO + ETL
+-- INSERINDO DADOS NO ANALÍTICO + ETL (INSERÇÃO DE DADOS E EXTRAÇÃO)
+
+-- LIMPEZA DE DADOS PARA A CARGA
 
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE dim_aluno;
@@ -38,10 +40,12 @@ INSERT INTO dim_professor (nk_id_professor, nome_professor, titulacao)
 SELECT p.pk_professor, f.nome, p.titulacao 
 FROM tb_professor p JOIN tb_funcionario f ON p.fk_funcionario = f.pk_funcionario;
 
+
 INSERT INTO dim_curso (nk_id_curso, nome_curso, modalidade) 
 SELECT pk_curso, nome, modalidade FROM tb_curso;
 
 
+-- ADICIONA DATAS DE VENCIMENTO QUE PODEM NÃO ESTAR NO PAGAMENTO E EXTRAÇÃO DE VENCIMENTOS E DATAS DE PAGAMENTO
 INSERT INTO dim_tempo (data_referencia, mes, ano, trimestre) 
 SELECT DISTINCT data_pagamento, MONTH(data_pagamento), YEAR(data_pagamento), QUARTER(data_pagamento) 
 FROM tb_pagamento; SELECT DISTINCT 
@@ -53,11 +57,13 @@ FROM tb_mensalidade
 LIMIT 0, 25;
 
 
-
+-- CONTROLA COLOCANDO NULL PARA CHAVES ORFÃS
 INSERT IGNORE INTO dim_tempo (sk_tempo, data_referencia, mes, ano, trimestre) 
 VALUES (-1, NULL, NULL, NULL, NULL);
 
+
 -- Carga das Fatos
+-- CALCULA A MÉDIA DAS NOTAS
 INSERT INTO fato_desempenho (sk_aluno, sk_professor, sk_curso, sk_tempo, nota_media)
 SELECT da.sk_aluno, dp.sk_professor, dc.sk_curso, 1, ROUND(AVG(n.nota), 2)
 FROM tb_matricula m
@@ -68,6 +74,8 @@ JOIN dim_curso dc ON t.fk_curso = dc.nk_id_curso
 JOIN tb_nota n ON n.fk_matricula = m.pk_matricula
 GROUP BY da.sk_aluno, dp.sk_professor, dc.sk_curso;
 
+-- CARGA FREQUENCIA
+-- SOMA A QUANTIDADE DE FALTAS
 INSERT INTO fato_frequencia (sk_aluno, sk_curso, sk_tempo, total_faltas)
 SELECT da.sk_aluno, dc.sk_curso, 1, SUM(fa.quantidade)
 FROM tb_matricula m
@@ -78,6 +86,7 @@ JOIN tb_falta fa ON fa.fk_matricula = m.pk_matricula
 GROUP BY da.sk_aluno, dc.sk_curso;
 
 -- Carga fato_financeiro 
+-- SOMA OS PAGAMENTOS E CALCULA O TOTAL DE DIAS DE ATRASO
 
 INSERT INTO fato_financeiro (sk_aluno, sk_tempo, valor_pago, dias_atraso)
 SELECT 
