@@ -1,0 +1,39 @@
+-- CONSULTAS OLTP (TRANSACIONAL)
+
+-- SELECT PARA LISTAR TODOS OS ALUNOS
+
+SELECT primeiro_nome_aluno, sobrenome_aluno, cpf_aluno, status_aluno
+FROM tb_aluno;
+
+-- SUBSELECT PARA VISUALIZAÇÃO DE ALUNOS ACIMA DA MÉDIA
+
+SELECT a.primeiro_nome_aluno, a.sobrenome_aluno
+FROM tb_aluno a
+WHERE a.pk_aluno IN (
+    SELECT m.fk_aluno
+    FROM tb_mensalidade m
+    WHERE m.valor > (SELECT AVG(valor) FROM tb_mensalidade)
+);
+
+-- CONTROLE TRANSACIONAL (ACID)
+
+
+
+-- ROLLBACK - SIMULA UM ERRO E NÃO GARANTE A INSERÇÃO DESSES DADOS NO BANCO
+
+START TRANSACTION;
+INSERT IGNORE INTO tb_aluno (primeiro_nome_aluno, sobrenome_aluno, cpf_aluno, data_nascimento_aluno)
+VALUES ('Aluno', 'Teste Rollback', '00000000000', '2002-01-02');
+ROLLBACK;
+
+
+SELECT * FROM tb_aluno WHERE cpf_aluno = '00000000000';
+
+-- COMMIT - SIMULA A INSERÇÃO DE UM VALOR CORRETO E A IMPLEMENTAÇÃO NO BANCO
+START TRANSACTION;
+INSERT IGNORE INTO tb_aluno (primeiro_nome_aluno, sobrenome_aluno, cpf_aluno, data_nascimento_aluno)
+VALUES ('Thomas', 'Silva', '99988877766', '2007-01-03');
+COMMIT;
+
+SELECT * FROM tb_aluno WHERE cpf_aluno = '99988877766';
+
