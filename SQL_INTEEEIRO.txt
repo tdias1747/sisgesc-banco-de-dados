@@ -142,7 +142,7 @@ CREATE TABLE tb_matricula (
   fk_aluno INT NOT NULL,
   fk_turma INT NOT NULL,
   data_matricula DATE DEFAULT (CURRENT_DATE),
-  status_matricula VARCHAR(20) DEFAULT 'Ativa' CHECK (status_matricula IN ('Ativa', 'Trancada', 'Cancelada', 'Concluída')),
+  status_matricula VARCHAR(20) DEFAULT 'Ativa' CHECK (status_matricula IN ('Ativa', 'Trancada', 'Cancelada', 'Concluida')),
   data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (fk_aluno, fk_turma),
@@ -391,7 +391,7 @@ ROLLBACK;
 
 SELECT * FROM tb_aluno WHERE cpf_aluno = '00000000000';
 
--- COMMIT - SIMULA A INSERÇÃO DE UM VALOR CORRETO E A IMPLEMENTAÇÃO NO BANCO
+-- COMMIT SIMULA A INSERÇÃO DE UM VALOR CORRETO E A IMPLEMENTAÇÃO NO BANCO
 
 START TRANSACTION;
 INSERT IGNORE INTO tb_aluno (primeiro_nome_aluno, sobrenome_aluno, cpf_aluno, data_nascimento_aluno)
