@@ -122,7 +122,7 @@ CREATE TABLE tb_carga_horaria_docente (
 
 -- Módulo Académico (2 PARTE)
 
--- CORREÇÃO APLICADA: Padronização das colunas da turma
+-- PADRONIZAÇÃO DE DADOS 
 CREATE TABLE tb_turma (
   pk_turma INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   fk_disciplina INT NOT NULL,
