@@ -584,3 +584,38 @@ JOIN dim_professor dp ON fd.sk_professor = dp.sk_professor -- IRÁ EXPLANAR ALL 
 GROUP BY dp.nome_professor;
 
 EXPLAIN SELECT * FROM fato_desempenho WHERE sk_professor = 1; -- MOSTRAGEM DO RESULTADO REF PROVANDO QUE SE TIVESSE GRANDES NÚMEROS DE DADOS RESULTARIA EM ref
+
+-- APLICAÇÃO DOS CÓDIGOS COM OS BIs
+
+-- BI 1: Comparativo entre as Notas e a Titulação do devido Professor
+SELECT 
+    p.titulacao, 
+    ROUND(AVG(f.nota_media), 2) AS media_notas,
+    COUNT(*) AS qtd_avaliacoes
+FROM fato_desempenho f 
+JOIN dim_professor p ON f.sk_professor = p.sk_professor 
+GROUP BY p.titulacao
+ORDER BY media_notas DESC;
+
+-- BI 2: Risco de Inadimplência (Análise de inadimplência)
+SELECT 
+    a.nome_aluno, 
+    f.valor_pago,
+    f.dias_atraso AS dias_atraso_total,
+    CASE 
+        WHEN f.dias_atraso > 30 THEN 'CRÍTICO'
+        WHEN f.dias_atraso > 0  THEN 'ATENÇÃO'
+        ELSE 'EM DIA' 
+    END AS status_inadimplencia
+FROM fato_financeiro f 
+JOIN dim_aluno a ON f.sk_aluno = a.sk_aluno
+ORDER BY f.dias_atraso DESC;
+
+-- BI 3: Validação OLTP e OLAP
+SELECT 
+    (SELECT ROUND(SUM(valor_pago), 2) FROM tb_pagamento) AS Total_Operacional_OLTP,
+    (SELECT ROUND(SUM(valor_pago), 2) FROM fato_financeiro) AS Total_Analitico_OLAP,
+    ROUND(
+        (SELECT SUM(valor_pago) FROM fato_financeiro) - 
+        (SELECT SUM(valor_pago) FROM tb_pagamento)
+    , 2) AS Diferenca;
