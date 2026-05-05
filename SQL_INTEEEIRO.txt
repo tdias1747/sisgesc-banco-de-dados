@@ -122,7 +122,7 @@ CREATE TABLE tb_carga_horaria_docente (
 
 -- Módulo Académico (2 PARTE)
 
--- PADRONIZAÇÃO DE DADOS 
+
 CREATE TABLE tb_turma (
   pk_turma INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   fk_disciplina INT NOT NULL,
@@ -176,7 +176,7 @@ CREATE TABLE tb_falta (
 CREATE TABLE tb_horario_grade (
   pk_grade INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   fk_turma INT NOT NULL,
-  dia_semana_grade VARCHAR(15) CHECK (dia_semana_grade IN ('Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo')),
+  dia_semana_grade VARCHAR(15) CHECK (dia_semana_grade IN ('Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado', 'Domingo')),
   horario_inicio_grade TIME NOT NULL,
   horario_fim_grade TIME NOT NULL,
   data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -216,7 +216,7 @@ CREATE TABLE tb_pagamento (
   fk_mensalidade INT NOT NULL,
   data_pagamento DATE NOT NULL,
   valor_pago DECIMAL(10,2) NOT NULL,
-  forma_pagamento VARCHAR(50) DEFAULT 'Cartão' CHECK (forma_pagamento IN ('Cartão', 'Boleto', 'PIX', 'Dinheiro')),
+  forma_pagamento VARCHAR(50) DEFAULT 'Cartão' CHECK (forma_pagamento IN ('Cartao', 'Boleto', 'PIX', 'Dinheiro')),
   data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (fk_mensalidade) REFERENCES tb_mensalidade(pk_mensalidade)
@@ -278,7 +278,7 @@ INSERT IGNORE INTO tb_professor (fk_funcionario, titulacao_professor) VALUES
 
 -- Carga de Cursos e Disciplinas
 INSERT IGNORE INTO tb_curso (nome_curso, modalidade_curso, carga_horaria_curso) VALUES
-('Análise e Desenvolvimento de Sistemas', 'Presencial', 2000.00),
+('Analise e Desenvolvimento de Sistemas', 'Presencial', 2000.00),
 ('Engenharia de Software', 'EAD', 3200.00);
 
 INSERT IGNORE INTO tb_disciplina (fk_curso, nome_disciplina, carga_horaria_disciplina) VALUES
@@ -294,7 +294,7 @@ INSERT IGNORE INTO tb_turma (fk_disciplina, fk_professor, fk_curso, semestre_tur
 
 INSERT IGNORE INTO tb_horario_grade (fk_turma, dia_semana_grade, horario_inicio_grade, horario_fim_grade) VALUES
 (1, 'Segunda', '19:00', '22:30'),
-(2, 'Terça', '19:00', '21:00');
+(2, 'Terca', '19:00', '21:00');
 
 -- Carga de Alunos e Contatos 
 INSERT IGNORE INTO tb_aluno (primeiro_nome_aluno, sobrenome_aluno, cpf_aluno, data_nascimento_aluno, status_aluno) VALUES
@@ -341,10 +341,10 @@ INSERT IGNORE INTO tb_mensalidade (fk_contrato, fk_aluno, valor_mensalidade, dat
 INSERT IGNORE INTO tb_pagamento (fk_mensalidade, data_pagamento, valor_pago, forma_pagamento) VALUES
 (1, '2026-04-11', 1000.00, 'PIX'),
 (2, '2026-04-10', 1000.00, 'Boleto'),
-(3, '2026-04-08', 1000.00, 'Cartão'),
+(3, '2026-04-08', 1000.00, 'Cartao'),
 (4, '2026-04-25', 850.00, 'PIX');
 
--- ATUALIZAÇÃO DE STATUS FINANCEIRO PARA QUE A VIEW POSSA ATUALIZAR OS DADOS DA INADIMPLÊNCIA (E CALCULAR COM DADOS MAIS ATUALIZADOS)
+-- ATUALIZAÇÃO DE STATUS FINANCEIRO PARA QUE o VIEW POSSA ATUALIZAR OS DADOS DA INADIMPLÊNCIA (E CALCULAR COM DADOS MAIS ATUALIZADOS)
 
 UPDATE tb_mensalidade SET status_mensalidade = 'Pago'     WHERE pk_mensalidade IN (1, 3, 4);
 UPDATE tb_mensalidade SET status_mensalidade = 'Atrasado' WHERE pk_mensalidade = 2;
@@ -407,7 +407,7 @@ SELECT * FROM tb_aluno WHERE cpf_aluno = '99988877766';
 
 -- AS SK SERVEM PARA DADOS QUE NÃO ESTÃO PRESENTES NO MUNDO REAL E QUE NORMALMENTE VÊM DO OLAP, ALÉM DE SERVIREM COMO ELO PARA QUE O FATO SE CONECTE COM A DIMENSÃO (DADOS QUE NÃO PODEM SER MUDADOS E QUE SÃO FAMILIARES COM O SISTEMA)
 
--- AUTO INCREMENT INSERE DADOS AUTOMATICAMENTE
+-- AUTO INCREMENT INSERE DADOS AUTOMATICAMENTE DEPOIS DA APLICAÇÃO DA CHAVE PRIMÁRIA
 
 -- Dimensões (Contexto Analítico)
 CREATE TABLE IF NOT EXISTS dim_aluno (
@@ -537,7 +537,7 @@ JOIN tb_turma   t ON fa.fk_turma  = t.pk_turma
 JOIN dim_curso dc ON t.fk_curso   = dc.nk_id_curso
 GROUP BY da.sk_aluno, dc.sk_curso;
 
--- Carga da Fato Financeiro ( CÁLCULO PARA DIFERENCIAR DATA DE PAGAMENTO COM O VENCIMENTO,  OU SEJA PARA RELACIONANDO O VENCIMENTO DOS PAGAMENTOS)
+-- Carga da Fato Financeiro ( CÁLCULO PARA DIFERENCIAR DATA DE PAGAMENTO COM O VENCIMENTO,  OU SEJA RELACIONANDO O VENCIMENTO DOS PAGAMENTOS)
 
 -- O COALESCE COLOCA VALORES CASO NÃO ENCONTRE ALGO QUE PROCURA (EX:1)
  
@@ -576,7 +576,7 @@ CREATE INDEX indx_fato_financeiro_aluno ON fato_financeiro(sk_aluno);
 DROP INDEX IF EXISTS indx_fato_frequencia_aluno ON fato_frequencia;
 CREATE INDEX indx_fato_frequencia_aluno ON fato_frequencia(sk_aluno);
 
--- Validação de Performance com EXPLAIN para verificar o uso dos índices
+-- Validação dA Performance com EXPLAIN 
 
 EXPLAIN SELECT dp.nome_professor, AVG(fd.nota_media)
 FROM fato_desempenho fd
